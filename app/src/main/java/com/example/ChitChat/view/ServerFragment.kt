@@ -25,6 +25,9 @@ class ServerFragment : Fragment() {
         super.onAttach(context)
 
         (activity as ChitChatActivity).acceptClient()
+        requireActivity().onBackPressedDispatcher.addCallback(
+            this, (activity as ChitChatActivity).CustomOnBackPress(enabled = true)
+        )
     }
     
     override fun onCreateView(

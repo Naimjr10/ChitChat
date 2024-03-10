@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.net.*
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.navigation.findNavController
 import java.net.*
@@ -231,4 +232,26 @@ class ChitChatActivity : AppCompatActivity() {
         }
     }
 
+    inner class CustomOnBackPress(enabled: Boolean): OnBackPressedCallback(enabled) {
+        override fun handleOnBackPressed() {
+            val navigationHost = findNavController(R.id.fragment_container)
+            val currentDestination = navigationHost.currentDestination!!
+
+            // id para fragment terletak pada file 'navigation_graphic.xml'
+
+            when (currentDestination.id) {
+                R.id.clientFragment -> {
+                    navigationHost.popBackStack()
+                    myClientSocket = null
+                    return
+                }
+                R.id.serverFragment -> {
+                    navigationHost.popBackStack()
+                    myServerSocket = null
+                    return
+                }
+
+            }
+        }
+    }
 }
