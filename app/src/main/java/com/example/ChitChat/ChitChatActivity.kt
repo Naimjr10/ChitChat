@@ -3,16 +3,10 @@ package com.example.ChitChat
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.*
 import android.net.*
-import android.os.CountDownTimer
 import android.util.Log
-import androidx.fragment.app.FragmentContainerView
+import androidx.activity.OnBackPressedCallback
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import java.net.*
 import kotlin.random.Random
 import kotlin.random.nextInt
@@ -33,6 +27,9 @@ class ChitChatActivity : AppCompatActivity() {
             return if (_myIP == null) null
             else _myIP!!
         }
+    private var _myServerPort: Int? = null
+    val myServerPort: Int?
+        get() = _myServerPort
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(
@@ -103,7 +100,7 @@ class ChitChatActivity : AppCompatActivity() {
                     // hubungkan ke server
                     myClientSocket!!.connect(
                         InetSocketAddress(serverAddress, serverPortNumber),
-                        5_000
+                        3_000
                     )
                 } catch (e: Exception) {
                     // gagal menghubungkan ke server
@@ -122,6 +119,53 @@ class ChitChatActivity : AppCompatActivity() {
         if (myClientSocket == null) {
             throw Exception("Tidak dapat terhubung ke server cuy")
         }
+    }
+
+    fun acceptClient() {
+        val acceptingThread = object : Thread() {
+            override fun run() {
+                myServerSocket = ServerSocket()
+                var serverPort = Random.nextInt(0..65500)
+
+                // bind socket selagi ada koneksi internet
+                while(myIP != null) {
+                    try {
+                        myServerSocket!!.bind(
+                            InetSocketAddress(myIP, serverPort)
+                        )
+
+                        // berhenti jika bind berhasil
+                        break
+                    } catch (e: Exception) {
+                        // ganti nomor port lain jika bind gagal
+                        serverPort = Random.nextInt(0..65500)
+
+                        e.printStackTrace()
+                    }
+                }
+                _myServerPort = serverPort
+
+                try {
+                    myServerSocket!!.accept()
+
+                    runOnUiThread {
+                        // jika client sudah terhubung, pindah ke sesi chat
+                        findNavController(R.id.fragment_container)
+                            .navigate(R.id.action_serverFragment_to_chattingFragment)
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        // jika gagal menerima client, kembali
+                        findNavController(R.id.fragment_container).popBackStack()
+                    }
+                    myServerSocket = null
+
+                    e.printStackTrace()
+                }
+            }
+        }
+        acceptingThread.name = "AcceptingClientThread"
+        acceptingThread.start()
     }
 
     private inner class OnInternetCallback : ConnectivityManager.NetworkCallback() {
@@ -182,10 +226,9 @@ class ChitChatActivity : AppCompatActivity() {
                         ")\n" +
                         "network == $network"
             )
-            myClientSocket = null
-            myServerSocket = null
 
             _myIP = null
         }
     }
+
 }
