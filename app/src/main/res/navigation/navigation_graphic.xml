@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_graphic"
+    app:startDestination="@id/chooseRoleFragment">
+    <fragment
+        android:id="@+id/chooseRoleFragment"
+        android:name="com.example.ChitChat.view.ChooseRoleFragment"
+        android:label="fragment_choose_role"
+        tools:layout="@layout/fragment_choose_role">
+        <action
+            android:id="@+id/action_chooseRoleFragment_to_clientFragment"
+            app:destination="@id/clientFragment" />
+        <action
+            android:id="@+id/action_chooseRoleFragment_to_serverFragment"
+            app:destination="@id/serverFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/clientFragment"
+        android:name="com.example.ChitChat.view.ClientFragment"
+        android:label="fragment_client"
+        tools:layout="@layout/fragment_client" >
+        <action
+            android:id="@+id/action_clientFragment_to_chattingFragment"
+            app:destination="@id/chattingFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/serverFragment"
+        android:name="com.example.ChitChat.view.ServerFragment"
+        android:label="fragment_server"
+        tools:layout="@layout/fragment_server" >
+        <action
+            android:id="@+id/action_serverFragment_to_chattingFragment"
+            app:destination="@id/chattingFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/chattingFragment"
+        android:name="com.example.ChitChat.view.ChattingFragment"
+        android:label="fragment_chatting"
+        tools:layout="@layout/fragment_chatting" />
+</navigation>
