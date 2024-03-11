@@ -29,6 +29,17 @@ class ServerFragment : Fragment() {
             this, (activity as ChitChatActivity).CustomOnBackPress(enabled = true)
         )
     }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(
+            TAG_ServerFragment,
+            "onCreate(\n" +
+                    "savedInstanceState: Bundle?\n" +
+                    ")\n" +
+                    "savedInstanceState == $savedInstanceState"
+        )
+        super.onCreate(savedInstanceState)
+    }
     
     override fun onCreateView(
         inflater: LayoutInflater,
