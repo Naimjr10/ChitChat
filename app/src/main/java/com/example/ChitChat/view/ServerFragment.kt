@@ -35,11 +35,33 @@ class ServerFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.d(
+            TAG_ServerFragment,
+            "onCreateView(\n" +
+                    "inflater: LayoutInflater,\n" +
+                    "container: ViewGroup?,\n" +
+                    "savedInstanceState: Bundle?\n" +
+                    ")\n" +
+                    "inflater == $inflater\n" +
+                    "container == $container\n" +
+                    "savedInstanceState == $savedInstanceState"
+        )
+        
         val view = inflater.inflate(R.layout.fragment_server, container, false)
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d(
+            TAG_ServerFragment,
+            "onViewCreated(\n" +
+                    "view: View,\n" +
+                    "savedInstanceState: Bundle?\n" +
+                    ")\n" +
+                    "view == $view\n" +
+                    "savedInstanceState == $savedInstanceState"
+        )
+
         val chitChatActivity = (activity as ChitChatActivity)
         val alamatIP = view.findViewById<TextView>(R.id.textview_alamat_ip)
         val nomorPort = view.findViewById<TextView>(R.id.textview_nomor_port)
