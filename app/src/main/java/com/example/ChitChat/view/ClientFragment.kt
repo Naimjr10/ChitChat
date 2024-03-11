@@ -14,9 +14,19 @@ import com.example.ChitChat.ChitChatActivity
 import com.example.ChitChat.R
 import com.google.android.material.textfield.TextInputEditText
 
+private const val TAG_ClientFragment = "ClientFragment"
+
 class ClientFragment : Fragment() {
 
     override fun onAttach(context: Context) {
+        Log.d(
+            TAG_ClientFragment,
+            "onAttach(\n" +
+                    "context: Context\n" +
+                    ")\n" +
+                    "context == $context"
+        )
+
         super.onAttach(context)
         requireActivity().onBackPressedDispatcher.addCallback(
             this, (activity as ChitChatActivity).CustomOnBackPress(enabled = true)
@@ -28,12 +38,34 @@ class ClientFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.d(
+            TAG_ClientFragment,
+            "onCreateView(\n" +
+                    "inflater: LayoutInflater,\n" +
+                    "container: ViewGroup?,\n" +
+                    "savedInstanceState: Bundle?\n" +
+                    ")\n" +
+                    "inflater == $inflater\n" +
+                    "container == $container\n" +
+                    "savedInstanceState == $savedInstanceState"
+        )
+
         val view = inflater.inflate(R.layout.fragment_client, container, false)
 
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d(
+            TAG_ClientFragment,
+            "onViewCreated(\n" +
+                    "view: View,\n" +
+                    "savedInstanceState: Bundle?\n" +
+                    ")\n" +
+                    "view == $view\n" +
+                    "savedInstanceState == $savedInstanceState"
+        )
+
         view.findViewById<Button>(R.id.button_hubungkan_ke_server).apply {
 
             setOnClickListener {
@@ -66,6 +98,11 @@ class ClientFragment : Fragment() {
     }
 
     override fun onDestroy() {
+        Log.d(
+            TAG_ClientFragment,
+            "onDestroy()"
+        )
+
         super.onDestroy()
     }
 }
