@@ -14,6 +14,7 @@ import kotlin.random.nextInt
 
 private const val TAG_ChitChatActivity = "ChitChatActivity"
 private const val TAG_OnInternetCallback = "OnInternetCallback"
+private const val TAG_CustomOnBackPress = "CustomOnBackPress"
 
 class ChitChatActivity : AppCompatActivity() {
     private lateinit var connectivityManager: ConnectivityManager
@@ -71,6 +72,15 @@ class ChitChatActivity : AppCompatActivity() {
         serverIP: String,
         serverPort: String
     ) {
+        Log.d(
+            TAG_ChitChatActivity,
+            "connectToServer(\n" +
+                    "serverIP: String,\n" +
+                    "serverPort: String\n" +
+                    ")\n" +
+                    "serverIP == $serverIP\n" +
+                    "serverPort == $serverPort"
+        )
         val connectingThread = object : Thread() {
             override fun run() {
                 myClientSocket = Socket()
@@ -123,6 +133,8 @@ class ChitChatActivity : AppCompatActivity() {
     }
 
     fun acceptClient() {
+        Log.d(TAG_ChitChatActivity, "acceptClient()")
+
         val acceptingThread = object : Thread() {
             override fun run() {
                 myServerSocket = ServerSocket()
@@ -234,6 +246,10 @@ class ChitChatActivity : AppCompatActivity() {
 
     inner class CustomOnBackPress(enabled: Boolean): OnBackPressedCallback(enabled) {
         override fun handleOnBackPressed() {
+            Log.d(
+                TAG_CustomOnBackPress,
+                "handleOnBackPressed()"
+            )
             val navigationHost = findNavController(R.id.fragment_container)
             val currentDestination = navigationHost.currentDestination!!
 
