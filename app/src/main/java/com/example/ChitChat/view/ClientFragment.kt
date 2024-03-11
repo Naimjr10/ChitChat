@@ -33,6 +33,18 @@ class ClientFragment : Fragment() {
         )
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(
+            TAG_ClientFragment,
+            "onCreate(\n" +
+                    "savedInstanceState: Bundle?\n" +
+                    ")\n" +
+                    "savedInstanceState == $savedInstanceState"
+        )
+
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
