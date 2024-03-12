@@ -131,9 +131,16 @@ class ChitChatActivity : AppCompatActivity() {
                         InetSocketAddress(serverAddress, serverPortNumber),
                         3_000
                     )
+                    runOnUiThread {
+                        _socketToSocketConnection.value = SOCKET_CONNECTION_CONNECTED
+                    }
                 } catch (e: Exception) {
                     // gagal menghubungkan ke server
-                    myClientSocket!!.close()
+                    myClientSocket?.close()
+                    runOnUiThread {
+                        _socketToSocketConnection.value = SOCKET_CONNECTION_NOT_CONNECTED
+                    }
+
                     myClientSocket = null
                     e.printStackTrace()
                 }
