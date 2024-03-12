@@ -5,9 +5,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.net.*
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.findNavController
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 import java.net.*
 import kotlin.random.Random
 import kotlin.random.nextInt
@@ -17,21 +20,36 @@ private const val TAG_OnInternetCallback = "OnInternetCallback"
 private const val TAG_CustomOnBackPress = "CustomOnBackPress"
 
 class ChitChatActivity : AppCompatActivity() {
+    companion object {
+        // konstan yang ditujukan untuk properti '_socketToSocketConnection'
+        const val SOCKET_CONNECTION_CONNECTED = "connected"
+        const val SOCKET_CONNECTION_NOT_CONNECTED = "not_connected"
+    }
+
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var onInternetCallback: OnInternetCallback
 
-    private var myClientSocket: Socket? = null
-    private var myServerSocket: ServerSocket? = null
-
     private var _myIP: InetAddress? = null
     val myIP: InetAddress?
-        get() {
-            return if (_myIP == null) null
-            else _myIP!!
-        }
+        get() = _myIP
+
+    private var myClientSocket: Socket? = null
+
+    private var myServerSocket: Socket? = null
     private var _myServerPort: Int? = null
     val myServerPort: Int?
         get() = _myServerPort
+
+    // menunjukkan keadaan koneksi dari soket perangkat ini ke soket perangkat lain
+    private var _socketToSocketConnection = MutableLiveData<String>()
+    val socketToSocketConnection: LiveData<String>
+        get() = _socketToSocketConnection
+
+    // berisi pesan yang diterima dari perangkat lain
+    private val _receivedMessage = MutableLiveData<String>()
+    val receivedMessage: LiveData<String>
+        get() = _receivedMessage
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(
@@ -115,7 +133,7 @@ class ChitChatActivity : AppCompatActivity() {
                     )
                 } catch (e: Exception) {
                     // gagal menghubungkan ke server
-
+                    myClientSocket!!.close()
                     myClientSocket = null
                     e.printStackTrace()
                 }
@@ -132,18 +150,18 @@ class ChitChatActivity : AppCompatActivity() {
         }
     }
 
-    fun acceptClient() {
-        Log.d(TAG_ChitChatActivity, "acceptClient()")
+    fun startAcceptingClient() {
+        Log.d(TAG_ChitChatActivity, "startAcceptingClient()")
 
         val acceptingThread = object : Thread() {
             override fun run() {
-                myServerSocket = ServerSocket()
+                val serverSocket = ServerSocket()
                 var serverPort = Random.nextInt(0..65500)
 
                 // bind socket selagi ada koneksi internet
-                while(myIP != null) {
+                while (myIP != null) {
                     try {
-                        myServerSocket!!.bind(
+                        serverSocket.bind(
                             InetSocketAddress(myIP, serverPort)
                         )
 
@@ -159,18 +177,18 @@ class ChitChatActivity : AppCompatActivity() {
                 _myServerPort = serverPort
 
                 try {
-                    myServerSocket!!.accept()
+                    myServerSocket = serverSocket.accept()
 
+                    // jika metode .accpet() keluar (return), maka sudah berhasil terhubung
                     runOnUiThread {
-                        // jika client sudah terhubung, pindah ke sesi chat
-                        findNavController(R.id.fragment_container)
-                            .navigate(R.id.action_serverFragment_to_chattingFragment)
+                        _socketToSocketConnection.value = SOCKET_CONNECTION_CONNECTED
                     }
                 } catch (e: Exception) {
                     runOnUiThread {
-                        // jika gagal menerima client, kembali
-                        findNavController(R.id.fragment_container).popBackStack()
+                        _socketToSocketConnection.value = SOCKET_CONNECTION_NOT_CONNECTED
                     }
+
+                    serverSocket.close()
                     myServerSocket = null
 
                     e.printStackTrace()
@@ -179,6 +197,97 @@ class ChitChatActivity : AppCompatActivity() {
         }
         acceptingThread.name = "AcceptingClientThread"
         acceptingThread.start()
+    }
+
+    fun sendMessage(message: String) {
+        val sendingThread = object : Thread() {
+            override fun run() {
+                try {
+                    // cek jika perannya sebagai client
+                    if (myClientSocket != null) {
+                        // kirim pesan
+                        ObjectOutputStream(myClientSocket!!.getOutputStream()).writeObject(message)
+                        return
+                    }
+                    // cek jika perannya sebagai server
+                    if (myServerSocket != null) {
+                        // kirim pesan
+                        ObjectOutputStream(myServerSocket!!.getOutputStream()).writeObject(message)
+                        return
+                    }
+                } catch (e: Exception) {
+                    // jika terjadi masalah dengan koneksi socket,
+                    // update keadaan koneksi socket
+                    runOnUiThread {
+                        _socketToSocketConnection.value = SOCKET_CONNECTION_NOT_CONNECTED
+                    }
+                    if (myClientSocket != null) {
+                        myClientSocket!!.close()
+                        myClientSocket = null
+                    }
+                    if (myServerSocket != null) {
+                        myServerSocket!!.close()
+                        myServerSocket = null
+                    }
+
+                    e.printStackTrace()
+                }
+
+            }
+        }
+        sendingThread.name = "SendingMessageThread"
+        sendingThread.start()
+    }
+
+    fun startReceivingMessage() {
+        val receivingThread = object : Thread() {
+            override fun run() {
+                while (true) {
+                    try {
+                        // cek jika perannya sebagai client
+                        if (myClientSocket != null) {
+                            // baca pesan yang dikirim oleh perangkat lain
+                            val receivedMessage =
+                                ObjectInputStream(myClientSocket!!.getInputStream()).readObject() /* timeout readObject kenapa lama? */
+                            runOnUiThread {
+                                _receivedMessage.value = (receivedMessage as String)
+                            }
+                            continue
+                        }
+                        // cek jika perannya sebagai server
+                        if (myServerSocket != null) {
+                            // baca pesan yang dikirim oleh perangkat lain
+                            val receivedMessage =
+                                ObjectInputStream(myServerSocket!!.getInputStream()).readObject()
+                            runOnUiThread {
+                                _receivedMessage.value = (receivedMessage as String)
+                            }
+                            continue
+                        }
+                    } catch (e: Exception) {
+                        // jika terjadi masalah dengan koneksi socket,
+                        // update keadaan koneksi socket
+                        runOnUiThread {
+                            _socketToSocketConnection.value = SOCKET_CONNECTION_NOT_CONNECTED
+                        }
+
+                        if (myClientSocket != null) {
+                            myClientSocket!!.close()
+                            myClientSocket = null
+                        }
+                        if (myServerSocket != null) {
+                            myServerSocket!!.close()
+                            myServerSocket = null
+                        }
+                        e.printStackTrace()
+
+                        break
+                    }
+                }
+            }
+        }
+        receivingThread.name = "ReceivingMessageThread"
+        receivingThread.start()
     }
 
     private inner class OnInternetCallback : ConnectivityManager.NetworkCallback() {
@@ -198,6 +307,9 @@ class ChitChatActivity : AppCompatActivity() {
             val linkAddresses = connectivityManager.getLinkProperties(network)!!.linkAddresses
             for (linkAddress in linkAddresses) {
                 val ip = linkAddress.address
+
+                // IP ini didapat dari perangkat lokal itu sendiri, jadi menurutku
+                // pelemparan pengecualian tidak mungkin terjadi
                 if (ip.isReachable(1_000)) {
                     _myIP = ip
                 }
@@ -244,7 +356,7 @@ class ChitChatActivity : AppCompatActivity() {
         }
     }
 
-    inner class CustomOnBackPress(enabled: Boolean): OnBackPressedCallback(enabled) {
+    inner class CustomOnBackPress(enabled: Boolean) : OnBackPressedCallback(enabled) {
         override fun handleOnBackPressed() {
             Log.d(
                 TAG_CustomOnBackPress,
@@ -266,7 +378,27 @@ class ChitChatActivity : AppCompatActivity() {
                     myServerSocket = null
                     return
                 }
+                R.id.chattingFragment -> {
+                    navigationHost.popBackStack()
 
+                    // cek jika perannya sebagai client
+                    if (myClientSocket != null) {
+                        // tutup client
+                        myClientSocket!!.close()
+                        myClientSocket = null
+
+                        return
+                    }
+
+                    // cek jika perannya sebagai server
+                    if (myServerSocket != null) {
+                        // tutup server
+                        myServerSocket!!.close()
+                        myServerSocket = null
+
+                        return
+                    }
+                }
             }
         }
     }

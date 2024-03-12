@@ -8,6 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
+import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.example.ChitChat.ChitChatActivity
 import com.example.ChitChat.R
 
@@ -24,7 +27,6 @@ class ServerFragment : Fragment() {
         )
         super.onAttach(context)
 
-        (activity as ChitChatActivity).acceptClient()
         requireActivity().onBackPressedDispatcher.addCallback(
             this, (activity as ChitChatActivity).CustomOnBackPress(enabled = true)
         )
@@ -57,7 +59,27 @@ class ServerFragment : Fragment() {
                     "container == $container\n" +
                     "savedInstanceState == $savedInstanceState"
         )
-        
+        val chitChatActivity = (activity as ChitChatActivity)
+        chitChatActivity.startAcceptingClient()
+        chitChatActivity.socketToSocketConnection.observe(
+            this.viewLifecycleOwner,
+
+            // Single Abstract Method (SAM) constructor
+            Observer {
+                if (it == ChitChatActivity.SOCKET_CONNECTION_CONNECTED) {
+                    findNavController().navigate(R.id.action_serverFragment_to_chattingFragment)
+                }
+                if (chitChatActivity.myIP == null) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Koneksi terputus",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    findNavController().popBackStack()
+                }
+            }
+        )
+
         val view = inflater.inflate(R.layout.fragment_server, container, false)
         return view
     }
@@ -76,6 +98,10 @@ class ServerFragment : Fragment() {
         val chitChatActivity = (activity as ChitChatActivity)
         val alamatIP = view.findViewById<TextView>(R.id.textview_alamat_ip)
         val nomorPort = view.findViewById<TextView>(R.id.textview_nomor_port)
+
+        while (chitChatActivity.myIP == null || chitChatActivity.myServerPort == null) {
+            // block sampai ip dan server port ada
+        }
 
         alamatIP.text = "Alamat IP saya : ${chitChatActivity.myIP}"
         nomorPort.text = "Nomor Port saya : ${chitChatActivity.myServerPort}"

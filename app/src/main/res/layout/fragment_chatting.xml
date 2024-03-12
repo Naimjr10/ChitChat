@@ -1,14 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".view.ChattingFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <ScrollView
+        android:id="@+id/scroll_container_pesan_pesan"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_marginBottom="8dp"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toTopOf="@+id/container_textinput_pesan"
+        app:layout_constraintTop_toTopOf="parent">
 
-</FrameLayout>
+        <LinearLayout
+            android:id="@+id/container_pesan_pesan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/container_textinput_pesan"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="4dp"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/imageview_kirim_pesan"
+        app:layout_constraintStart_toStartOf="parent"
+        app:hintEnabled="false">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/textinput_pesan"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="Kirim pesan"
+            android:textSize="16sp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <ImageView
+        android:id="@+id/imageview_kirim_pesan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:contentDescription="Kirim pesan"
+        android:src="@drawable/ic_baseline_send_24"
+        app:layout_constraintBottom_toBottomOf="@+id/container_textinput_pesan"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/container_textinput_pesan" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
