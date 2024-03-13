@@ -20,7 +20,7 @@
             android:id="@+id/textinput_alamat_ip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Masukkan alamat IP perangkat lain"
+            android:hint="Masukkan alamat IP server"
             android:singleLine="true"/>
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -36,7 +36,7 @@
             android:id="@+id/textinput_nomor_port"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Masukkan nomor port perangkat lain"
+            android:hint="Masukkan nomor port server"
             android:singleLine="true"/>
 
     </com.google.android.material.textfield.TextInputLayout>
