@@ -131,7 +131,7 @@ class ChattingFragment : Fragment() {
                 this.gravity = Gravity.END
             }
             tv.text = textInputPesan.text.toString()
-            tv.setBackgroundColor(Color.RED)
+            tv.setBackgroundColor(Color.YELLOW)
             tv.textSize = 25F
 
             textInputPesan.text?.clear()
