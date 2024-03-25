@@ -1,6 +1,7 @@
 # ChitChat
- Aplikasi Chat, [download](https://drive.google.com/file/d/1sgZCtXteGhBKWdQuhDlfx4W4g_5S1sDo/view?usp=sharing).
+ Aplikasi berkirim pesan, [download](https://drive.google.com/file/d/1sgZCtXteGhBKWdQuhDlfx4W4g_5S1sDo/view?usp=sharing).
 
+# Gambaran Aplikasi
 <table>
     <tr>
         <td>Step</td>
